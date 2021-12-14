@@ -79,7 +79,7 @@ public class GameService extends AbstractVerticle {
         {
             JsonObject jsonObject = jsonArray.getJsonObject(n);
             System.out.println(jsonObject.getString("name") + " clan is active, ClanInfo: "
-                    + jsonArray);
+                    + jsonObject);
         }
     }
 

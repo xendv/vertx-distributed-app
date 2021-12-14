@@ -1,5 +1,7 @@
 package members.roles;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.Clan;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -18,7 +20,7 @@ public class Admin extends BaseRole {
     public void start(Promise<Void> startPromise) {
         vertx.eventBus().send("gameservice.join", USER_INFO);
         subscribe();
-        long timerID = vertx.setTimer(30000, id -> exit());
+        //long timerID = vertx.setTimer(50000, id -> exit());
     }
 
     private void subscribe() {
@@ -36,10 +38,18 @@ public class Admin extends BaseRole {
                     }
                 });
 
-        final JsonObject clanInfo = new JsonObject().put("name", clan.getName())
-                .put("admin", name).put("limit", clan.DEFAULT_LIMIT);
-        vertx.sharedData().getClusterWideMap("activeClans", map ->
-                map.result().put(clan.getName(), clanInfo));
+       // final JsonObject clanInfo = new JsonObject().put("name", clan.getName())
+         //       .put("admin", name).put("limit", clan.DEFAULT_LIMIT);
+
+        try{
+            final JsonObject clanInfo = new JsonObject(new ObjectMapper().writeValueAsString(clan));
+            vertx.sharedData().getClusterWideMap("activeClans", map ->
+                    map.result().put(clan.getName(), clanInfo));
+        }
+        catch (JsonProcessingException e){
+            e.printStackTrace();
+        }
+
     }
 
     @Override

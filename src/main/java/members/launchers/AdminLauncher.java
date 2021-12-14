@@ -10,7 +10,7 @@ public final class AdminLauncher {
     public static void main(String[] args) {
 
         System.setProperty("hazelcast.ignoreXxeProtectionFailures", "true");
-        int QUANTITY = 1;
+        int QUANTITY = 2;
 
         Vertx.clusteredVertx(
                 new VertxOptions(),

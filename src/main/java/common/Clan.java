@@ -10,7 +10,9 @@ import org.jetbrains.annotations.Nullable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Clan {
     @JsonIgnore
-    public final int DEFAULT_LIMIT = 2;
+    public final int DEFAULT_LIMIT = 1;
+    @JsonIgnore
+    public final int DEFAULT_MODS_LIMIT = 2;
 
     @NotNull
     private String name;
@@ -18,6 +20,9 @@ public class Clan {
     private String admin;
     @Nullable
     private Integer limit = DEFAULT_LIMIT;
+    @Nullable
+    private Integer modsLimit = DEFAULT_LIMIT;
+    @JsonProperty(value = "membersCount")
     private int membersCount = 0;
 
     public Clan(@NotNull String name, @NotNull String admin){
@@ -29,9 +34,11 @@ public class Clan {
     public Clan(@JsonProperty(value = "name", required = true) @NotNull String name,
                 @JsonProperty(value = "admin", required = true) @NotNull String admin,
                 @JsonProperty(value = "limit") @Nullable Integer limit,
-                @JsonProperty(value = "membersCount") Integer membersCount){
+                @JsonProperty(value = "modsLimit") @Nullable Integer modsLimit,
+                @JsonProperty(value = "membersCount", required = true) Integer membersCount){
         this.name = name;
         if (limit != null) this.limit = limit;
+        if (modsLimit != null) this.modsLimit = modsLimit;
         this.admin = admin;
         if (membersCount != null) this.membersCount = membersCount;
     }

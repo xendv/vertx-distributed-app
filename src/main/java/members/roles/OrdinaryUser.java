@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.Clan;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Array;
@@ -33,10 +34,12 @@ public class OrdinaryUser extends BaseRole {
         final int delay = random.nextInt(3000, 5000);
         vertx.eventBus().consumer("gameservice.started",
                 event -> vertx.eventBus().send("gameservice.join", USER_INFO));
-        long timerID = vertx.setTimer(delay, id ->
+        long timerJoin = vertx.setTimer(delay, id ->
                 vertx.eventBus().send("gameservice.join", USER_INFO));
+        long timer = vertx.setTimer(delay, id -> chooseActiveClan("joinClan"));
 
-        vertx.setPeriodic(delay, timer -> System.out.println(clanName));
+
+        //vertx.setPeriodic(delay, timer -> System.out.println(clanName));
         //vertx.setPeriodic(10000, timer -> getActiveClans("joinClan"));
     }
 
@@ -46,21 +49,18 @@ public class OrdinaryUser extends BaseRole {
                     System.out.println("Active clans:");
                     if (clans.result().isEmpty()) System.out.println("No active clans :(");
                     else {
-                        printActiveClans(getActiveClansJsonArray(clans.result()));
+                        var activeClans = getActiveClansJsonArray(clans.result());
+                        printActiveClans(activeClans);
 
-                        Set<String> keys = new HashSet<>();
-                        for (Object o : clans.result().keySet()) {
-                            keys.add((String) o);
-                        }
-                        List<String> clansList = new ArrayList<>(keys);
+                        //var clansList =  activeClans.getList();
                         switch (action){
-                            case "joinRandomClan": joinRandomClan(clansList);
+                            case "joinRandomClan": joinRandomClan(activeClans);
                             break;
                             case "joinClan": {
-                                if (clansList.contains(clanToJoin)) joinClan(this.clanToJoin);
+                                if (clans.result().containsKey((clanToJoin))) joinClan(this.clanToJoin);
                                 else {
-                                    System.out.println("Clan is not active, choosing another...");
-                                    joinRandomClan(clansList);
+                                    System.out.println("Clan " + clanToJoin + " is not active, choosing another...");
+                                    joinRandomClan(activeClans);
                                 }
                             }
                             break;
@@ -72,14 +72,15 @@ public class OrdinaryUser extends BaseRole {
         );
     }
 
-    public void joinRandomClan(List<String> clans){
+    public void joinRandomClan(JsonArray clans){
         ThreadLocalRandom random = ThreadLocalRandom.current();
         final int itemNumber = random.nextInt(clans.size());
-        clanToJoin = clans.get(itemNumber);
+        clanToJoin = clans.getJsonObject(itemNumber).getString("name");
         joinClan(clanToJoin);
     }
 
     public void joinClan(String clanName){
-        vertx.eventBus().send("gameservice.clans.join", clanName);
+        JsonObject jsonObject = new JsonObject().put("clanName", clanName).put("user", name);
+        vertx.eventBus().send("gameservice.request.join", jsonObject);
     }
 }
