@@ -1,17 +1,28 @@
 package members.roles;
 
+import common.Clan;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Verticle;
 import io.vertx.core.impl.JavaVerticleFactory;
 import io.vertx.core.json.JsonObject;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class OrdinaryUser extends AbstractVerticle {
     private final String name;
+    private String clanName;
+    static int counter = 1;
 
     public OrdinaryUser(long number) {
         this.name = "user#" + number;
+        counter ++;
+    }
+
+    public OrdinaryUser() {
+        this.name = "user#" + counter;
+        counter ++;
     }
 
     @Override
@@ -25,7 +36,7 @@ public class OrdinaryUser extends AbstractVerticle {
 
         vertx.eventBus().consumer("gameservice.started", event -> vertx.eventBus().send("gameservice.join", message));
 
-        vertx.setPeriodic(2000, timer ->
+        vertx.setPeriodic(10000, timer ->
                 vertx.sharedData().getClusterWideMap("activeClans", map ->
                         map.result().entries(clans -> {
                             if (clans.result().isEmpty()) System.out.println("No active clans :(");
@@ -39,20 +50,4 @@ public class OrdinaryUser extends AbstractVerticle {
                 )
         );
     }
-
-    public static final class Factory extends JavaVerticleFactory {
-        private long number;
-
-        @Override
-        public String prefix() {
-            return "service";
-        }
-
-        @SuppressWarnings("ProhibitedExceptionDeclared")
-        //@Override
-        public Verticle createVerticle(String verticleName, ClassLoader classLoader) {
-            return new OrdinaryUser(number++);
-        }
-    }
-
 }

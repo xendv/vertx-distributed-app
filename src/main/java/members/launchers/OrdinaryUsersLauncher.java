@@ -16,8 +16,6 @@ public final class OrdinaryUsersLauncher {
                 new VertxOptions(),
                 vertxResult -> {
                     final var vertx = vertxResult.result();
-                    final var factory = new OrdinaryUser.Factory();
-                    vertx.registerVerticleFactory(factory);
                     final DeploymentOptions optionsMember = new DeploymentOptions().setWorker(true).setInstances(2);
                     vertx.deployVerticle(OrdinaryUser.class.getName(), optionsMember);
                 }

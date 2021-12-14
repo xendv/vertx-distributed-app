@@ -1,5 +1,6 @@
 package members.roles;
 
+import common.Clan;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -7,24 +8,24 @@ import io.vertx.core.json.JsonObject;
 public class Admin extends AbstractVerticle {
     static int counter = 1;
     private final String name;
-    private final String clan;
+    private final Clan clan;
 
     public Admin() {
         this.name = "admin#" + counter;
-        this.clan = "CLAN#" + counter;
+        this.clan = new Clan("CLAN#" + counter);
         counter ++;
     }
 
     public Admin(long number) {
         this.name = "admin#" + number;
-        this.clan = "CLAN#" + number;
+        this.clan = new Clan("CLAN#" + number);
         counter ++;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
         subscribe();
-        long timerID = vertx.setTimer(3000, id -> {
+        long timerID = vertx.setTimer(20000, id -> {
             exit();
             //vertx.eventBus().send("gameservice.exit.admin", name);
         });
@@ -47,7 +48,7 @@ public class Admin extends AbstractVerticle {
                 });
 
         vertx.sharedData().getClusterWideMap("activeClans", map ->
-                map.result().put(clan, name));
+                map.result().put(clan.getName(), name));
     }
 
     @Override
@@ -60,7 +61,7 @@ public class Admin extends AbstractVerticle {
         System.out.println(name + " exits");
 
         vertx.sharedData().getClusterWideMap("activeClans", map ->
-                map.result().remove(clan));
+                map.result().remove(clan.getName()));
         vertx.eventBus().send("gameservice.exit.admin", message);
     }
 }

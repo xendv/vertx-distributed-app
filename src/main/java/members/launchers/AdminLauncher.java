@@ -16,7 +16,7 @@ public final class AdminLauncher {
                 new VertxOptions(),
                 vertxResult -> {
                     final var vertx = vertxResult.result();
-                    final DeploymentOptions optionsMember = new DeploymentOptions().setWorker(true).setInstances(2);
+                    final DeploymentOptions optionsMember = new DeploymentOptions().setWorker(true).setInstances(1);
                     vertx.deployVerticle(Admin.class.getName(), optionsMember);
                 }
         );

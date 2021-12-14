@@ -18,8 +18,6 @@ public class GameService extends AbstractVerticle {
                     vertx.eventBus().send("Member was connected to GS as ", name);
                 }
         ).completionHandler(result -> {
-            //vertx.eventBus().publish("gameservice.started", null);
-
             if (result.succeeded()) {
                 startPromise.complete();
                 return;
