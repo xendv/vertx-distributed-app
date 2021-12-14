@@ -1,14 +1,7 @@
 package members.roles;
 
-import common.Clan;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
-import io.vertx.core.Verticle;
-import io.vertx.core.impl.JavaVerticleFactory;
 import io.vertx.core.json.JsonObject;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class OrdinaryUser extends AbstractVerticle {
     private final String name;
@@ -35,6 +28,7 @@ public class OrdinaryUser extends AbstractVerticle {
         System.out.println(name + " wants to join the service");
 
         vertx.eventBus().consumer("gameservice.started", event -> vertx.eventBus().send("gameservice.join", message));
+        vertx.eventBus().send("gameservice.join", message);
 
         vertx.setPeriodic(10000, timer ->
                 vertx.sharedData().getClusterWideMap("activeClans", map ->

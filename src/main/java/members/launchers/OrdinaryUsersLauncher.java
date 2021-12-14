@@ -10,13 +10,13 @@ public final class OrdinaryUsersLauncher {
     public static void main(String[] args) {
 
         System.setProperty("hazelcast.ignoreXxeProtectionFailures", "true");
-        int QUANTITY = 1;
+        int QUANTITY = 2;
 
         Vertx.clusteredVertx(
                 new VertxOptions(),
                 vertxResult -> {
                     final var vertx = vertxResult.result();
-                    final DeploymentOptions optionsMember = new DeploymentOptions().setWorker(true).setInstances(2);
+                    final DeploymentOptions optionsMember = new DeploymentOptions().setWorker(true).setInstances(QUANTITY);
                     vertx.deployVerticle(OrdinaryUser.class.getName(), optionsMember);
                 }
         );
