@@ -14,12 +14,14 @@ repositories {
 }
 
 dependencies {
+    // vertx
     val vertxVersion = "4.2.1"
     implementation("io.vertx:vertx-core:${vertxVersion}")
     implementation("io.vertx:vertx-codegen:${vertxVersion}")
     implementation("io.vertx:vertx-hazelcast:${vertxVersion}")
 
-
+    // jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
 }
 
 tasks.getByName<Test>("test") {

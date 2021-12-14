@@ -1,54 +1,45 @@
 package members.roles;
 
 import common.Clan;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
-public class Admin extends AbstractVerticle {
+public class Admin extends BaseRole {
     static int counter = 1;
-    private final String name;
     private final Clan clan;
 
     public Admin() {
-        this.name = "admin#" + counter;
-        this.clan = new Clan("CLAN#" + counter);
-        counter ++;
-    }
-
-    public Admin(long number) {
-        this.name = "admin#" + number;
-        this.clan = new Clan("CLAN#" + number);
-        counter ++;
+        super("admin#" + counter,"admin");
+        this.clan = new Clan("CLAN#" + counter, name);
+        counter++;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
+        vertx.eventBus().send("gameservice.join", USER_INFO);
         subscribe();
-        long timerID = vertx.setTimer(20000, id -> {
-            exit();
-            //vertx.eventBus().send("gameservice.exit.admin", name);
-        });
+        long timerID = vertx.setTimer(30000, id -> exit());
     }
 
     private void subscribe() {
-        final JsonObject message = new JsonObject().put("name", name);
         System.out.println(name + " wants to join the service");
 
-        vertx.eventBus().consumer("gameservice.started", event -> vertx.eventBus().send("gameservice.join", message));
-        vertx.eventBus().send("gameservice.join.admin", message);
+        vertx.eventBus().consumer("gameservice.started",
+                event -> vertx.eventBus().send("gameservice.join", USER_INFO));
 
         vertx.eventBus().<String>consumer("exit.admin", event ->
                 {
-                    System.out.println("Admin " + name + "wants to exit");
+                    System.out.println("Admin " + name + "had to exit");
                     final String adminToExit = event.body();
                     if (adminToExit.equals(name)) {
-                        vertx.eventBus().send("gameservice.exit.admin", message);
+                        vertx.eventBus().send("gameservice.exit", USER_INFO);
                     }
                 });
 
+        final JsonObject clanInfo = new JsonObject().put("name", clan.getName())
+                .put("admin", name).put("limit", clan.DEFAULT_LIMIT);
         vertx.sharedData().getClusterWideMap("activeClans", map ->
-                map.result().put(clan.getName(), name));
+                map.result().put(clan.getName(), clanInfo));
     }
 
     @Override
@@ -57,11 +48,10 @@ public class Admin extends AbstractVerticle {
     }
 
     private void exit(){
-        final JsonObject message = new JsonObject().put("name", name);
         System.out.println(name + " exits");
 
         vertx.sharedData().getClusterWideMap("activeClans", map ->
                 map.result().remove(clan.getName()));
-        vertx.eventBus().send("gameservice.exit.admin", message);
+        vertx.eventBus().send("gameservice.exit", USER_INFO);
     }
 }
